@@ -29,5 +29,5 @@ def add_blog(new_blog:BlogInput,db:Session=Depends(get_db)):
     return blog
 
 @app.get("/get-blogs",response_model=list[BlogResponse])
-def display_blogs(db:Session=Depends(get_db)):
-    return db.query(Blog).all()
+def display_blogs(skip:int=0,db:Session=Depends(get_db)):
+    return db.query(Blog).offset(skip).limit(10).all()

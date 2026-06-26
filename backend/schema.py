@@ -11,5 +11,5 @@ class BlogResponse(BlogInput):
     id: uuid.UUID
     created_at: datetime
 
-    # class Config:
+    # class Config: 
     #     from_attributes = True
