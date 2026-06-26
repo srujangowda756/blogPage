@@ -1,7 +1,10 @@
-from fastapi import FastAPI
-from schema import BlogInput
-from datetime import datetime
+from fastapi import FastAPI,Depends
+from schema import BlogInput,BlogResponse
+from model import Blog
+from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from database import engine,Base,get_db
+
 
 app = FastAPI()
 app.add_middleware(
@@ -11,18 +14,20 @@ app.add_middleware(
     allow_methods=["*"]
 )
 
-data=[{"id":"1","title":"first","content":"asdfghj","created_at":"23-05-2026"}]
+Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def home():
     return {"status":"working"}
 
-@app.post("/add-blog")
-def add_blog(new_blog:BlogInput):
-    temp={"id":new_blog.id,"title":new_blog.title,"content":new_blog.content,"created_at": datetime.now()}
-    data.append(temp)
-    return {"status":"ok"}
+@app.post("/add-blog",response_model=BlogResponse)
+def add_blog(new_blog:BlogInput,db:Session=Depends(get_db)):
+    blog=Blog(title=new_blog.title,content=new_blog.content)
+    db.add(blog)
+    db.commit()
+    db.refresh(blog)
+    return blog
 
-@app.get("/get-blogs")
-def display_blogs():
-    return data
+@app.get("/get-blogs",response_model=list[BlogResponse])
+def display_blogs(db:Session=Depends(get_db)):
+    return db.query(Blog).all()
