@@ -30,7 +30,7 @@ def add_blog(new_blog:BlogInput,db:Session=Depends(get_db)):
 
 @app.get("/get-blogs",response_model=list[BlogResponse])
 def display_blogs(skip:int=0,db:Session=Depends(get_db)):
-    return db.query(Blog).offset(skip).limit(8).all()
+    return db.query(Blog).order_by(Blog.created_at.asc()).offset(skip).limit(8).all()
 
 
 @app.delete("/delete-blog/{blog_id}")
@@ -38,17 +38,13 @@ def delete_particular_blog(blog_id:uuid.UUID,db:Session=Depends(get_db)):
     deletingblog=db.query(Blog).filter(Blog.id==blog_id).first()
     db.delete(deletingblog)
     db.commit()
-    #db.refresh(deletingblog)
     return {"status":"Blog deleted successfully"}
 
-@app.put("/changecontent/{blog_id}")
+@app.put("/update-blog/{blog_id}")
 def update_blog(blog_id:uuid.UUID,new_update:BlogInput,db:Session=Depends(get_db)):
     updating_blog=db.query(Blog).filter(Blog.id==blog_id).first()
-    yield updating_blog
     updating_blog.title=new_update.title
     updating_blog.content=new_update.content
-
     db.commit()
     db.refresh(updating_blog)
     return {"status":"Update Successfully"}
-    

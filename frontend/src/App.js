@@ -18,7 +18,7 @@ function App() {
 
     }
     catch {
-      alert("failed");
+      alert("failed to fetch blogs");
     }
   }
 
