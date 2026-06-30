@@ -4,7 +4,7 @@ import DisplayBlog from "./components/blog-display"
 import EveryBlogs from "./components/blogs/allBlogs"
 import InputForm from "./components/inputForm"
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_URL = process.env.REACT_APP_API_URL;
 
 function App() {
   const [addBlog, setAddBlog] = useState(false);

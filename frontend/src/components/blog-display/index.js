@@ -2,7 +2,7 @@ import './index.css'
 import { useContext, useState } from "react"
 import EveryBlogs from "../blogs/allBlogs"
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_URL = process.env.REACT_APP_API_URL;
 
 const DisplayBlog = ({ cont }) => {
     const { fetchBlogs } = useContext(EveryBlogs)
