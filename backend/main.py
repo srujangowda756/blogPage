@@ -7,7 +7,7 @@ from routes.blog import router
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://blog-page-seven-rho.vercel.app"],
     allow_headers=["*"],
     allow_methods=["*"]
 )
