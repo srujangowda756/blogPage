@@ -1,8 +1,10 @@
 import './App.css';
-import { useState, useEffect} from "react"
+import { useState, useEffect, useCallback } from "react"
 import DisplayBlog from "./components/blog-display"
 import EveryBlogs from "./components/blogs/allBlogs"
 import InputForm from "./components/inputForm"
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 function App() {
   const [addBlog, setAddBlog] = useState(false);
@@ -10,9 +12,9 @@ function App() {
   const [blogs, setBlogs] = useState([]);
   const [skip, setSkip] = useState(0);
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:8000/blogs?skip=${skip}`);
+      const res = await fetch(`${API_URL}/blogs?skip=${skip}`);
       const data = await res.json()
       setBlogs(data)
 
@@ -20,11 +22,11 @@ function App() {
     catch {
       alert("failed to fetch blogs");
     }
-  }
+  }, [skip])
 
   useEffect(() => {
     fetchBlogs();
-  }, [skip])
+  }, [fetchBlogs])
 
   return (
     <EveryBlogs.Provider value={{fetchBlogs,setNewBlog,new_blog,setAddBlog}}>

@@ -2,6 +2,8 @@ import './index.css'
 import { useContext, useState } from "react"
 import EveryBlogs from "../blogs/allBlogs"
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
 const DisplayBlog = ({ cont }) => {
     const { fetchBlogs } = useContext(EveryBlogs)
     const [title, setTitle] = useState(cont.title)
@@ -9,7 +11,7 @@ const DisplayBlog = ({ cont }) => {
     const [isUpdating, setIsUpdating] = useState(false)
 
     const updateBlog = async () => {
-        await fetch(`http://localhost:8000/blogs/${cont.id}`, {
+        await fetch(`${API_URL}/blogs/${cont.id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -25,7 +27,7 @@ const DisplayBlog = ({ cont }) => {
     }
 
     const deleteBlog = async () => {
-        await fetch(`http://localhost:8000/blogs/${cont.id}`, {
+        await fetch(`${API_URL}/blogs/${cont.id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
@@ -66,7 +68,3 @@ const DisplayBlog = ({ cont }) => {
 }
 
 export default DisplayBlog
-
-
-
-

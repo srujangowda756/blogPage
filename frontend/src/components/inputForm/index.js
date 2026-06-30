@@ -1,12 +1,14 @@
 import { useContext} from "react"
 import EveryBlogs from "../blogs/allBlogs"
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
 const InputForm = () => {
     const { new_blog, setAddBlog, setNewBlog,fetchBlogs } = useContext(EveryBlogs)
 
     
       const send_blog = async () => {
-        await fetch("http://localhost:8000/blogs/", {
+        await fetch(`${API_URL}/blogs/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
