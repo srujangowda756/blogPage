@@ -12,7 +12,7 @@ function App() {
 
   const fetchBlogs = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/get-blogs?skip=${skip}`);
+      const res = await fetch(`http://localhost:8000/blogs?skip=${skip}`);
       const data = await res.json()
       setBlogs(data)
 

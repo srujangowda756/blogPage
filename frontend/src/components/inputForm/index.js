@@ -6,7 +6,7 @@ const InputForm = () => {
 
     
       const send_blog = async () => {
-        await fetch("http://localhost:8000/add-blog", {
+        await fetch("http://localhost:8000/blogs/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -26,8 +26,8 @@ const InputForm = () => {
         <div className="blog-form card">
             <div className="form-header">
               <div>
-                <h2 className="form-title">Update blog post</h2>
-                <p className="form-subtitle">Edit the title and content, then submit to save your changes.</p>
+                <h2 className="form-title">Create new blog</h2>
+                <p className="form-subtitle">Write your blog content here and submit to save it.</p>
               </div>
             </div>
             <label>
@@ -35,7 +35,7 @@ const InputForm = () => {
               <input
                 className="form-input"
                 type="text"
-                placeholder="Enter a compelling title"
+                placeholder="Enter title"
                 value={new_blog.title}
                 onChange={(e) => setNewBlog({ ...new_blog, title: e.target.value })}
               />

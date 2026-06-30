@@ -2,14 +2,15 @@ from pydantic import BaseModel
 from datetime import datetime
 import uuid
 
-class BlogInput(BaseModel):
+class BlogBase(BaseModel):
     title:str
     content:str
 
+class BlogInput(BlogBase):
+    pass
 
-class BlogResponse(BlogInput):
+class BlogResponse(BlogBase):
     id: uuid.UUID
     created_at: datetime
 
-    # class Config: 
-    #     from_attributes = True
+    model_config={"from_attributes":True}

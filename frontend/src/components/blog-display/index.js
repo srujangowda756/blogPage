@@ -9,7 +9,7 @@ const DisplayBlog = ({ cont }) => {
     const [isUpdating, setIsUpdating] = useState(false)
 
     const updateBlog = async () => {
-        await fetch(`http://localhost:8000/update-blog/${cont.id}`, {
+        await fetch(`http://localhost:8000/blogs/${cont.id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -25,7 +25,7 @@ const DisplayBlog = ({ cont }) => {
     }
 
     const deleteBlog = async () => {
-        await fetch(`http://localhost:8000/delete-blog/${cont.id}`, {
+        await fetch(`http://localhost:8000/blogs/${cont.id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
