@@ -1,61 +1,56 @@
-import './App.css';
-import { useState, useEffect, useCallback } from "react"
-import DisplayBlog from "./components/blog-display"
-import EveryBlogs from "./components/blogs/allBlogs"
-import InputForm from "./components/inputForm"
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import BlogList from './pages/BlogList';
+import BlogDetail from './pages/BlogDetail';
+import BlogForm from './pages/BlogForm';
+import './index.css';
 
-const API_URL = process.env.REACT_APP_API_URL;
+function NotFound() {
+  return (
+    <div style={{
+      textAlign: 'center',
+      padding: '6rem 1.5rem',
+      color: 'var(--text-secondary)'
+    }}>
+      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🌌</div>
+      <h2 style={{ color: 'var(--text-primary)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+        Page not found
+      </h2>
+      <p style={{ marginBottom: '1.5rem' }}>
+        The page you're looking for doesn't exist.
+      </p>
+      <a
+        href="/"
+        style={{
+          display: 'inline-block',
+          padding: '0.6rem 1.4rem',
+          background: 'var(--accent)',
+          color: '#fff',
+          borderRadius: 'var(--radius-sm)',
+          fontWeight: 600,
+          fontSize: '0.9rem',
+          textDecoration: 'none',
+        }}
+      >
+        Go Home
+      </a>
+    </div>
+  );
+}
 
 function App() {
-  const [addBlog, setAddBlog] = useState(false);
-  const [new_blog, setNewBlog] = useState({ title: "", content: "" });
-  const [blogs, setBlogs] = useState([]);
-  const [skip, setSkip] = useState(0);
-
-  const fetchBlogs = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_URL}/blogs?skip=${skip}`);
-      const data = await res.json()
-      setBlogs(data)
-
-    }
-    catch {
-      alert("failed to fetch blogs");
-    }
-  }, [skip])
-
-  useEffect(() => {
-    fetchBlogs();
-  }, [fetchBlogs])
-
   return (
-    <EveryBlogs.Provider value={{fetchBlogs,setNewBlog,new_blog,setAddBlog}}>
-      <div className="main">
-      <header>
-        <div>
-          <h1>Blog Page</h1>
-        </div>
-        <button className="btn btn-secondary" onClick={() => setAddBlog(true)}>Add blog</button>
-      </header>
-
-      <div className="content">
-        {addBlog ? (
-          <InputForm/>
-        ) : (
-          <div className="blog-area">
-            <div className="display">
-              {blogs.map((blog) => (<DisplayBlog key={blog.id} cont={blog} />))}
-            </div>
-            <div className="pagination card">
-              <button className="btn btn-tertiary" onClick={() => setSkip(prev => Math.max(0, prev - 8))}>Prev</button>
-              <span>Showing {skip + 1} - {skip + 8}</span>
-              <button className="btn btn-tertiary" onClick={() => setSkip(prev => prev + 8)}>Next</button>
-            </div>
-          </div>
-        )}
-      </div>
-      </div>
-    </EveryBlogs.Provider>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<BlogList />} />
+        <Route path="/blogs/:id" element={<BlogDetail />} />
+        <Route path="/create" element={<BlogForm />} />
+        <Route path="/edit/:id" element={<BlogForm />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
