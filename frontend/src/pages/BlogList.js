@@ -63,7 +63,7 @@ export default function BlogList() {
               </div>
               <h2 className="card-title">{blog.title}</h2>
               <p className="card-excerpt">
-                {blog.content.slice(0, 150)}{blog.content.length > 150 ? '…' : ''}
+                {blog.content.slice(0, 50)}{blog.content.length > 50 ? '…' : ''}
               </p>
               <div className="card-footer">
                 <span className="card-date">{formatDate(blog.created_at)}</span>
