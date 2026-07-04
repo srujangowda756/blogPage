@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import declarative_base
 from dotenv import load_dotenv
 import os
+import ssl
 
 load_dotenv()
 
@@ -16,7 +17,17 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(DATABASE_URL)
+# asyncpg does not support 'sslmode' query param — strip it and pass ssl via connect_args
+if "sslmode" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.split("?")[0]
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    connect_args = {"ssl": ssl_context}
+else:
+    connect_args = {}
+
+engine = create_async_engine(DATABASE_URL, connect_args=connect_args)
 Async_sessionLocal = async_sessionmaker(
     autocommit=False,
     class_=AsyncSession,
