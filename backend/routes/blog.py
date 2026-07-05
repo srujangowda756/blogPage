@@ -14,11 +14,11 @@ async def add_blog(new_blog:BlogInput,db:AsyncSession=Depends(get_db)):
     db.add(blog)
     await db.commit()
     await db.refresh(blog)
-    return {"status":"Blog added successfully"}
+    return blog
 
 @router.get("/",response_model=list[BlogResponse])
-async def display_blogs(skip:int=0,db:AsyncSession=Depends(get_db)):
-    all_blogs= await db.execute(select(Blog).order_by(Blog.created_at.asc()).offset(skip).limit(8))
+async def display_blogs(skip:int=0,limit:int=8,db:AsyncSession=Depends(get_db)):
+    all_blogs= await db.execute(select(Blog).order_by(Blog.created_at.asc()).offset(skip).limit(limit))
     return all_blogs.scalars().all()
 
 
@@ -38,7 +38,6 @@ async def delete_particular_blog(blog_id:uuid.UUID,db:AsyncSession=Depends(get_d
         raise HTTPException(status_code=404, detail="Blog not found")
     await db.delete(deletingblog)
     await db.commit()
-    return {"status":"Delete Successfully"}
 
 @router.put("/{blog_id}")
 async def update_blog(blog_id:uuid.UUID,new_update:BlogInput,db:AsyncSession=Depends(get_db)):

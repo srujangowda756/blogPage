@@ -11,10 +11,10 @@ A full-stack blog application built using **React**, **FastAPI**, and **PostgreS
 
 * Create, edit, and delete blog posts
 * View all published blogs with pagination
-* Responsive React-based user interface
+* Responsive React-based user interface with custom CSS styling
 * FastAPI-powered REST API
 * PostgreSQL database integration
-* Material-UI (MUI) components for modern UI
+* React Router for client-side routing
 * Form validation and error handling
 * Clean and scalable project structure
 * CORS-enabled for cross-origin requests
@@ -24,9 +24,10 @@ A full-stack blog application built using **React**, **FastAPI**, and **PostgreS
 ### Frontend
 
 * **React.js** - UI framework
-* **Material-UI (MUI)** - React component library
+* **React Router** - Client-side routing
+* **Vite** - Build tool and dev server
 * **JavaScript (ES6+)** - Programming language
-* **CSS** - Styling
+* **CSS** - Custom styling
 
 ### Backend
 
@@ -114,16 +115,16 @@ npm install
 Create a `.env` file in the frontend directory with the following variables:
 
 ```env
-REACT_APP_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8000
 ```
 
 4. Start the development server:
 
 ```bash
-npm start
+npm run dev
 ```
 
-The frontend will be available at `http://localhost:3000`
+The frontend will be available at `http://localhost:5173`
 
 ## API Documentation
 
@@ -151,13 +152,16 @@ blogPage/
 │   ├── public/           # Static assets
 │   ├── src/
 │   │   ├── components/   # React components
-│   │   │   ├── blog-display/
-│   │   │   ├── blogs/
-│   │   │   └── inputForm/
-│   │   ├── App.js        # Main application component
-│   │   ├── App.css       # Application styles
-│   │   └── index.js      # Application entry point
+│   │   │   └── Navbar.jsx
+│   │   ├── pages/        # Page components
+│   │   │   ├── BlogList.jsx
+│   │   │   ├── BlogDetail.jsx
+│   │   │   └── BlogForm.jsx
+│   │   ├── App.jsx       # Main application component
+│   │   ├── index.css     # Global styles
+│   │   └── main.jsx      # Application entry point
 │   ├── package.json      # Frontend dependencies
+│   ├── vite.config.js    # Vite configuration
 │   └── .env              # Frontend environment variables (gitignored)
 ├── backend/
 │   ├── database.py       # Database configuration
@@ -166,7 +170,6 @@ blogPage/
 │   ├── routes/           # API route definitions
 │   ├── schema/           # Pydantic schemas
 │   ├── requirements.txt  # Python dependencies
-│   ├── runtime.txt       # Pinned Python version for deployment
 │   └── .env              # Backend environment variables (gitignored)
 └── README.md              # This file
 ```
@@ -178,7 +181,7 @@ blogPage/
 3. Start the backend server
 4. Configure the frontend `.env` file with the backend API URL
 5. Start the frontend development server
-6. Open `http://localhost:3000` in your browser
+6. Open `http://localhost:5173` in your browser
 
 ## Development
 
@@ -204,7 +207,7 @@ cd frontend
 npm run build
 ```
 
-This creates an optimized production build in the `frontend/build` directory.
+This creates an optimized production build in the `frontend/dist` directory.
 
 ## Deployment
 
@@ -228,7 +231,9 @@ The frontend is deployed on [Vercel](https://vercel.com).
 | Setting | Value |
 |---|---|
 | Root Directory | `frontend` |
-| Environment Variables | `REACT_APP_API_URL` |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Environment Variables | `VITE_API_URL` |
 
 Live URL: `https://blog-page-seven-rho.vercel.app`
 
