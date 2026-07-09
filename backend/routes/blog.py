@@ -30,7 +30,7 @@ async def add_blog(new_blog:BlogInput,db:AsyncSession=Depends(get_db),current_us
     return blog
 
 @router.get("/",response_model=list[BlogResponse])
-async def display_blogs(skip:int=0,limit:int=8,db:AsyncSession=Depends(get_db)):
+async def display_blogs(skip:int=0,limit:int=6,db:AsyncSession=Depends(get_db)):
     all_blogs= await db.execute(select(Blog).order_by(Blog.created_at.asc()).offset(skip).limit(limit))
     return all_blogs.scalars().all()
 

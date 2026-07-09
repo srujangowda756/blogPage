@@ -18,19 +18,28 @@ export default function BlogList() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const pageSize = 6;
+
+  async function loadBlogs(nextPage = 1) {
+    setLoading(true);
+    setError('');
+
+    try {
+      const data = await fetchBlogs((nextPage - 1) * pageSize, pageSize);
+      setBlogs(data);
+      setPage(nextPage);
+      setHasMore(data.length === pageSize);
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadBlogs() {
-      try {
-        const data = await fetchBlogs();
-        setBlogs(data);
-      } catch (err) {
-        setError(err.message || 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadBlogs();
+    loadBlogs(1);
   }, []);
 
   return (
@@ -71,6 +80,28 @@ export default function BlogList() {
             </article>
           ))}
         </div>
+
+        {!loading && !error && blogs.length > 0 && (
+          <div className="pagination">
+            <button
+              type="button"
+              className="pagination-btn"
+              onClick={() => loadBlogs(page - 1)}
+              disabled={page === 1 || loading}
+            >
+              ← Previous
+            </button>
+            <span className="pagination-page">Page {page}</span>
+            <button
+              type="button"
+              className="pagination-btn"
+              onClick={() => loadBlogs(page + 1)}
+              disabled={!hasMore || loading}
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

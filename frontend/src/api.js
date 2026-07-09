@@ -69,8 +69,9 @@ export async function registerUser(email, password) {
   });
 }
 
-export async function fetchBlogs() {
-  return request('/blogs/');
+export async function fetchBlogs(skip = 0, limit = 6) {
+  const params = new URLSearchParams({ skip: skip.toString(), limit: limit.toString() });
+  return request(`/blogs/?${params.toString()}`);
 }
 
 export async function fetchBlogById(id) {
