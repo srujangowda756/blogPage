@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 from database import Base, DATABASE_URL
 import model.blog
+import model.user
 import asyncio
 
 config = context.config

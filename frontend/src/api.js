@@ -1,0 +1,98 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+function getToken() {
+  return localStorage.getItem('blog_token');
+}
+
+function getAuthHeaders() {
+  const headers = {};
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+export function saveAuth(token) {
+  localStorage.setItem('blog_token', token);
+}
+
+export function clearAuth() {
+  localStorage.removeItem('blog_token');
+}
+
+export function isAuthenticated() {
+  return Boolean(getToken());
+}
+
+export async function request(path, options = {}) {
+  const isFormData = options.body instanceof FormData;
+
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      ...(!isFormData && { 'Content-Type': 'application/json' }),
+      ...getAuthHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+
+  const contentType = res.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const data = isJson ? await res.json().catch(() => ({})) : await res.text().catch(() => '');
+
+  if (!res.ok) {
+    const message = typeof data === 'string' ? data : data.detail || data.message || 'Request failed';
+    throw new Error(message);
+  }
+
+  if (res.status === 204) {
+    return null;
+  }
+
+  return data;
+}
+
+export async function loginUser(email, password) {
+  const data = await request('/user/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+  saveAuth(data.access_token);
+  return data;
+}
+
+export async function registerUser(email, password) {
+  return request('/user/register', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function fetchBlogs() {
+  return request('/blogs/');
+}
+
+export async function fetchBlogById(id) {
+  return request(`/blogs/${id}`);
+}
+
+export async function createBlog(payload) {
+  return request('/blogs/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateBlog(id, payload) {
+  return request(`/blogs/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteBlog(id) {
+  return request(`/blogs/${id}`, {
+    method: 'DELETE',
+  });
+}

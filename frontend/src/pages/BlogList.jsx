@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { fetchBlogs } from '../api';
 import './BlogList.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function readingTime(content) {
   const words = content.trim().split(/\s+/).length;
@@ -21,11 +20,9 @@ export default function BlogList() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    async function fetchBlogs() {
+    async function loadBlogs() {
       try {
-        const res = await fetch(`${API_URL}/blogs/`);
-        if (!res.ok) throw new Error('Failed to load blogs');
-        const data = await res.json();
+        const data = await fetchBlogs();
         setBlogs(data);
       } catch (err) {
         setError(err.message || 'Something went wrong');
@@ -33,7 +30,7 @@ export default function BlogList() {
         setLoading(false);
       }
     }
-    fetchBlogs();
+    loadBlogs();
   }, []);
 
   return (

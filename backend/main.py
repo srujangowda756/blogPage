@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 from routes.blog import router
-
+from routes.user import route
 
 app = FastAPI()
 
@@ -14,6 +13,7 @@ app.add_middleware(
 )
 
 app.include_router(router)
+app.include_router(route)
 
 @app.get("/")
 def home():

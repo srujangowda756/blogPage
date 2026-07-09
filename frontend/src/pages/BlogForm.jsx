@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { createBlog, fetchBlogById, fetchBlogs, updateBlog } from '../api';
 import './BlogForm.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function BlogForm() {
   const { id } = useParams();
@@ -19,11 +18,9 @@ export default function BlogForm() {
 
   useEffect(() => {
     if (!isEdit) return;
-    async function fetchBlog() {
+    async function loadBlog() {
       try {
-        const res = await fetch(`${API_URL}/blogs/${id}`);
-        if (!res.ok) throw new Error('Blog not found');
-        const data = await res.json();
+        const data = await fetchBlogById(id);
         const blog = Array.isArray(data) ? data[0] : data;
         setTitle(blog.title);
         setContent(blog.content);
@@ -33,27 +30,40 @@ export default function BlogForm() {
         setLoading(false);
       }
     }
-    fetchBlog();
+    loadBlog();
   }, [id, isEdit]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setTouched({ title: true, content: true });
-    if (!title.trim() || !content.trim()) return;
+
+    const normalizedTitle = title.trim();
+    const normalizedContent = content.trim();
+    if (!normalizedTitle || !normalizedContent) return;
 
     setSubmitting(true);
     setError('');
     setSuccess('');
 
     try {
-      const url = isEdit ? `${API_URL}/blogs/${id}` : `${API_URL}/blogs/`;
-      const method = isEdit ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), content: content.trim() }),
-      });
-      if (!res.ok) throw new Error(isEdit ? 'Failed to update' : 'Failed to create');
+      if (!isEdit) {
+        const existingBlogs = await fetchBlogs();
+        const titleExists = existingBlogs.some(
+          blog => blog.title?.trim().toLowerCase() === normalizedTitle.toLowerCase()
+        );
+
+        if (titleExists) {
+          setError('A blog with this title already exists. Please choose a different title.');
+          return;
+        }
+      }
+
+      const payload = { title: normalizedTitle, content: normalizedContent };
+      if (isEdit) {
+        await updateBlog(id, payload);
+      } else {
+        await createBlog(payload);
+      }
 
       setSuccess(isEdit ? 'Post updated successfully!' : 'Post published successfully!');
       setTimeout(() => {

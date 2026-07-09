@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { deleteBlog, fetchBlogById } from '../api';
 import './BlogDetail.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function readingTime(content) {
   const words = content.trim().split(/\s+/).length;
@@ -25,11 +24,9 @@ export default function BlogDetail() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
-    async function fetchBlog() {
+    async function loadBlog() {
       try {
-        const res = await fetch(`${API_URL}/blogs/${id}`);
-        if (!res.ok) throw new Error('Blog not found');
-        const data = await res.json();
+        const data = await fetchBlogById(id);
         setBlog(Array.isArray(data) ? data[0] : data);
       } catch (err) {
         setError(err.message || 'Something went wrong');
@@ -37,14 +34,13 @@ export default function BlogDetail() {
         setLoading(false);
       }
     }
-    fetchBlog();
+    loadBlog();
   }, [id]);
 
   async function handleDelete() {
     setDeleting(true);
     try {
-      const res = await fetch(`${API_URL}/blogs/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete');
+      await deleteBlog(id);
       navigate('/', { state: { deleted: true } });
     } catch (err) {
       setError(err.message);

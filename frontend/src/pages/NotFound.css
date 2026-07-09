@@ -1,0 +1,28 @@
+.main-div{
+        text-align: center;
+        padding: 6rem 1.5rem;
+        color: var(--text-secondary);
+}
+.link{
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+.small-heading{
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+.para{
+    margin-bottom: 1.5rem;
+}
+
+.emoji{
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
