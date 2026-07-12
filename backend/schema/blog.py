@@ -9,8 +9,13 @@ class BlogBase(BaseModel):
 class BlogInput(BlogBase):
     pass
 
+class AuthorInfo(BaseModel):
+    email:str 
+    model_config={"from_attributes":True}
+
 class BlogResponse(BlogBase):
     id: uuid.UUID
     created_at: datetime
+    author : AuthorInfo
 
     model_config={"from_attributes":True}

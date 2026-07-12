@@ -80,6 +80,7 @@ export default function BlogDetail() {
               para.trim() ? <p key={i}>{para}</p> : <br key={i} />
             )}
           </div>
+          <div><p> by - {blog.author.email}</p></div>
         </article>
 
         {/* Actions */}
