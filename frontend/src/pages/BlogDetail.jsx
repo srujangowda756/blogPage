@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { deleteBlog, fetchBlogById } from '../api';
+import { deleteBlog, fetchBlogById, isAuthenticated } from '../api';
 import './BlogDetail.css';
 
 function readingTime(content) {
@@ -83,17 +83,25 @@ export default function BlogDetail() {
         </article>
 
         {/* Actions */}
-        <div className="article-actions">
-          <Link to={`/edit/${blog.id}`} className="btn-edit">
-            ✏ Edit Post
-          </Link>
-          <button
-            className="btn-delete"
-            onClick={() => setShowConfirm(true)}
-          >
-            🗑 Delete Post
-          </button>
-        </div>
+        {isAuthenticated() ? (
+          <div className="article-actions">
+            <Link to={`/edit/${blog.id}`} className="btn-edit">
+              ✏ Edit Post
+            </Link>
+            <button
+              className="btn-delete"
+              onClick={() => setShowConfirm(true)}
+            >
+              🗑 Delete Post
+            </button>
+          </div>
+        ) : (
+          <div className="article-actions">
+            <Link to="/login" className="btn-edit">
+              🔐 Login to edit or delete
+            </Link>
+          </div>
+        )}
 
         {/* Confirm Modal */}
         {showConfirm && (

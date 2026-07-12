@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser, registerUser, isAuthenticated } from '../api';
 import './BlogForm.css';
@@ -11,10 +11,11 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  if (isAuthenticated()) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();

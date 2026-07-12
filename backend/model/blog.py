@@ -10,5 +10,5 @@ class Blog(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String, nullable=False, unique=True)
     content = Column(String, nullable=False)
-    user_id=Column(UUID(as_uuid=True),ForeignKey("users.id"),nullable=True)
+    user_id=Column(UUID(as_uuid=True),ForeignKey("users.id"),nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc))

@@ -1,7 +1,36 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const AUTH_TOKEN_KEY = 'blog_token';
 
-function getToken() {
-  return localStorage.getItem('blog_token');
+export function getApiBaseUrl() {
+  return API_URL;
+}
+
+export function getWsUrl() {
+  const normalized = API_URL.replace(/^http/, 'ws');
+  return `${normalized}/ws`;
+}
+
+function parseJwt(token) {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = atob(normalized);
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
+function isTokenExpired(token) {
+  if (!token) return true;
+  const payload = parseJwt(token);
+  if (!payload || !payload.exp) return false;
+  return Date.now() >= payload.exp * 1000;
+}
+
+export function getToken() {
+  return localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
 function getAuthHeaders() {
@@ -14,19 +43,35 @@ function getAuthHeaders() {
 }
 
 export function saveAuth(token) {
-  localStorage.setItem('blog_token', token);
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  window.dispatchEvent(new Event('auth:changed'));
 }
 
 export function clearAuth() {
-  localStorage.removeItem('blog_token');
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  window.dispatchEvent(new Event('auth:changed'));
 }
 
 export function isAuthenticated() {
-  return Boolean(getToken());
+  const token = getToken();
+  if (!token) return false;
+
+  if (isTokenExpired(token)) {
+    clearAuth();
+    return false;
+  }
+
+  return true;
 }
 
 export async function request(path, options = {}) {
   const isFormData = options.body instanceof FormData;
+  const token = getToken();
+
+  if (token && isTokenExpired(token)) {
+    clearAuth();
+    throw new Error('Session expired. Please log in again.');
+  }
 
   const res = await fetch(`${API_URL}${path}`, {
     ...options,

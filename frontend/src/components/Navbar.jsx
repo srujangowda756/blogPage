@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { clearAuth, isAuthenticated } from '../api';
 import './Navbar.css';
@@ -6,7 +6,13 @@ import './Navbar.css';
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const authenticated = isAuthenticated();
+  const [authenticated, setAuthenticated] = useState(isAuthenticated());
+
+  useEffect(() => {
+    const syncAuth = () => setAuthenticated(isAuthenticated());
+    window.addEventListener('auth:changed', syncAuth);
+    return () => window.removeEventListener('auth:changed', syncAuth);
+  }, []);
 
   function handleAuthAction() {
     if (authenticated) {

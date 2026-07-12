@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchBlogs } from '../api';
+import { fetchBlogs, getWsUrl } from '../api';
 import './BlogList.css';
 
 function readingTime(content) {
@@ -20,9 +20,10 @@ export default function BlogList() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [liveMessage, setLiveMessage] = useState('');
   const pageSize = 6;
 
-  async function loadBlogs(nextPage = 1) {
+  const loadBlogs = useCallback(async (nextPage = 1) => {
     setLoading(true);
     setError('');
 
@@ -36,17 +37,39 @@ export default function BlogList() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [pageSize]);
 
   useEffect(() => {
     loadBlogs(1);
-  }, []);
+  }, [loadBlogs]);
+
+  useEffect(() => {
+    const socket = new WebSocket(getWsUrl());
+
+    socket.onmessage = (event) => {
+      setLiveMessage(event.data);
+      loadBlogs(1);
+    };
+
+    socket.onerror = () => {
+      setLiveMessage('');
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [loadBlogs]);
 
   return (
     <div className="bloglist-page">
       <main className="container bloglist-main">
         {loading && <div className="spinner" />}
         {error && <div className="error-box">⚠ {error}</div>}
+        {liveMessage && (
+          <div className="error-box" style={{ background: '#eefdf3', color: '#166534' }}>
+            🔔 {liveMessage}
+          </div>
+        )}
 
         {!loading && !error && blogs.length === 0 && (
           <div className="empty-state">

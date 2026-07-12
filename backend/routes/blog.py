@@ -6,8 +6,11 @@ from model.blog import Blog
 from model.user import User
 from database import get_db
 from sqlalchemy import select
-from auth import get_current_user
+from features.auth import get_current_user
 import uuid
+import asyncio
+from features.manager_websocket import manager
+from features.cache import get_cache,set_cache
 
 router=APIRouter(prefix="/blogs",tags=["blogs"])
 
@@ -23,16 +26,25 @@ async def add_blog(new_blog:BlogInput,db:AsyncSession=Depends(get_db),current_us
         db.add(blog)
         await db.commit()
         await db.refresh(blog)
-    except IntegrityError as exc:
+    except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=400, detail="A blog with this title already exists") from exc
-
+        raise HTTPException(status_code=400, detail="A blog with this title already exists")
+    await manager.brodcast(f"New blog posted: {blog.title}")
+    
     return blog
 
 @router.get("/",response_model=list[BlogResponse])
 async def display_blogs(skip:int=0,limit:int=6,db:AsyncSession=Depends(get_db)):
-    all_blogs= await db.execute(select(Blog).order_by(Blog.created_at.asc()).offset(skip).limit(limit))
-    return all_blogs.scalars().all()
+    check_cache=await get_cache("blogs")
+    if not check_cache:
+        all_blogs = await db.execute(select(Blog).order_by(Blog.created_at.asc()).offset(skip).limit(limit))
+        blogs_group = all_blogs.scalars().all()
+        blogs_data = [BlogResponse.model_validate(blog).model_dump(mode="json") for blog in blogs_group]
+        await set_cache("blogs", blogs_data)
+        return blogs_group
+    else:
+        return check_cache
+
 
 
 @router.get("/{blog_id}",response_model=BlogResponse)
@@ -46,12 +58,11 @@ async def display_particular_blog(blog_id:uuid.UUID,db:AsyncSession=Depends(get_
 
 @router.delete("/{blog_id}",status_code=204)
 async def delete_particular_blog(blog_id:uuid.UUID,db:AsyncSession=Depends(get_db),current_user:dict=Depends(get_current_user)):
-    this_user=await db.execute(select(User).filter(current_user["sub"]==User.email))
+    this_user,deletingblog=await asyncio.gather( db.execute(select(User).filter(current_user["sub"]==User.email)),db.execute(select(Blog).filter(Blog.id==blog_id)))
+    deletingblog=deletingblog.scalars().first()
     this_user=this_user.scalars().first()
     if not this_user:
         raise HTTPException(status_code=403,detail="Login first")
-    deletingblog=await db.execute(select(Blog).filter(Blog.id==blog_id))
-    deletingblog=deletingblog.scalars().first()
     if not deletingblog:
         raise HTTPException(status_code=404, detail="Blog not found")
     if this_user.id==deletingblog.user_id:
@@ -62,12 +73,11 @@ async def delete_particular_blog(blog_id:uuid.UUID,db:AsyncSession=Depends(get_d
 
 @router.put("/{blog_id}",response_model=BlogResponse)
 async def update_blog(blog_id:uuid.UUID,new_update:BlogInput,db:AsyncSession=Depends(get_db),current_user:dict=Depends(get_current_user)):
-    this_user=await db.execute(select(User).filter(User.email==current_user["sub"]))
+    this_user,result=await asyncio.gather(db.execute(select(User).filter(User.email==current_user["sub"])),db.execute(select(Blog).filter(Blog.id==blog_id)))
+    updating_blog=result.scalars().first() 
     this_user=this_user.scalars().first()
     if not this_user:
         raise HTTPException(status_code=403,detail="Login first")
-    result=await db.execute(select(Blog).filter(Blog.id==blog_id))
-    updating_blog=result.scalars().first()   
     if not updating_blog:
         raise HTTPException(status_code=404,detail="Blog not found")  
     if this_user.id==updating_blog.user_id:
