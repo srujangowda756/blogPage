@@ -35,12 +35,13 @@ async def add_blog(new_blog:BlogInput,db:AsyncSession=Depends(get_db),current_us
 
 @router.get("/",response_model=list[BlogResponse])
 async def display_blogs(skip:int=0,limit:int=6,db:AsyncSession=Depends(get_db)):
-    check_cache=await get_cache("blogs")
+    cache_key = f"blogs:{skip}:{limit}"
+    check_cache = await get_cache(cache_key)
     if not check_cache:
         all_blogs = await db.execute(select(Blog).order_by(Blog.created_at.asc()).offset(skip).limit(limit))
         blogs_group = all_blogs.scalars().all()
         blogs_data = [BlogResponse.model_validate(blog).model_dump(mode="json") for blog in blogs_group]
-        await set_cache("blogs", blogs_data)
+        await set_cache(cache_key, blogs_data)
         return blogs_group
     else:
         return check_cache
