@@ -9,12 +9,15 @@ A full-stack blog application built using **React**, **FastAPI**, and **PostgreS
 
 ## Features
 
-* Create, edit, and delete blog posts
+* User authentication (register/login with JWT)
+* Create, edit, and delete blog posts (authenticated users only)
 * View all published blogs with pagination
+* Real-time updates via WebSocket
 * Responsive React-based user interface with custom CSS styling
 * FastAPI-powered REST API
 * PostgreSQL database integration
 * React Router for client-side routing
+* Redis caching for improved performance
 * Form validation and error handling
 * Clean and scalable project structure
 * CORS-enabled for cross-origin requests
@@ -32,14 +35,18 @@ A full-stack blog application built using **React**, **FastAPI**, and **PostgreS
 ### Backend
 
 * **FastAPI** - Modern Python web framework
-* **SQLAlchemy** - SQL toolkit and ORM
+* **SQLAlchemy (Async)** - SQL toolkit and ORM
 * **Pydantic** - Data validation using Python type annotations
 * **Uvicorn** - ASGI server
+* **asyncpg** - Async PostgreSQL driver
+* **python-jose** - JWT authentication
+* **bcrypt** - Password hashing
+* **Redis** - Caching layer
 
 ### Database
 
 * **PostgreSQL** - Relational database
-* **psycopg2-binary** - PostgreSQL adapter for Python
+* **Redis** - In-memory data store for caching
 * **Neon** - Managed PostgreSQL hosting (production)
 
 ## Installation
@@ -49,6 +56,7 @@ A full-stack blog application built using **React**, **FastAPI**, and **PostgreS
 * Node.js (v14 or higher)
 * Python (v3.8 or higher)
 * PostgreSQL database
+* Redis server (optional - uses fakeredis for development)
 
 ### Clone the repository
 
@@ -84,6 +92,7 @@ Create a `.env` file in the backend directory with the following variables:
 
 ```env
 DATABASE_URL=postgresql://username:password@localhost:5432/database_name
+SECRET_KEY=your-secret-key-for-jwt
 ```
 
 > **Note:** Never commit `.env` files. In production, environment variables are set directly in the hosting platform's dashboard (see Deployment section below).
@@ -138,11 +147,17 @@ to access the interactive Swagger API documentation.
 
 ### API Endpoints
 
+**Authentication:**
+* `POST /user/register` - Register a new user
+* `POST /user/login` - Login and receive JWT token
+
+**Blogs:**
 * `GET /` - Health check endpoint
 * `GET /blogs` - Retrieve all blogs with pagination support
-* `POST /blogs` - Create a new blog post
-* `PUT /blogs/{id}` - Update an existing blog post
-* `DELETE /blogs/{id}` - Delete a blog post
+* `GET /blogs/{id}` - Retrieve a specific blog post
+* `POST /blogs` - Create a new blog post (requires authentication)
+* `PUT /blogs/{id}` - Update an existing blog post (requires authentication, owner only)
+* `DELETE /blogs/{id}` - Delete a blog post (requires authentication, owner only)
 
 ## Project Structure
 
@@ -152,11 +167,16 @@ blogPage/
 │   ├── public/           # Static assets
 │   ├── src/
 │   │   ├── components/   # React components
-│   │   │   └── Navbar.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Navbar.css
 │   │   ├── pages/        # Page components
-│   │   │   ├── BlogList.jsx
+│   │   │   ├── Auth.jsx
 │   │   │   ├── BlogDetail.jsx
-│   │   │   └── BlogForm.jsx
+│   │   │   ├── BlogForm.jsx
+│   │   │   ├── BlogList.jsx
+│   │   │   └── NotFound.jsx
+│   │   ├── assets/       # Additional assets
+│   │   ├── api.js        # API utility functions
 │   │   ├── App.jsx       # Main application component
 │   │   ├── index.css     # Global styles
 │   │   └── main.jsx      # Application entry point
@@ -164,11 +184,25 @@ blogPage/
 │   ├── vite.config.js    # Vite configuration
 │   └── .env              # Frontend environment variables (gitignored)
 ├── backend/
+│   ├── alembic/          # Database migration files
+│   ├── features/         # Additional features (auth, cache, websocket)
+│   │   ├── auth.py
+│   │   ├── cache.py
+│   │   ├── config.py
+│   │   ├── manager_websocket.py
+│   │   └── utlity.py
+│   ├── model/            # Database models
+│   │   ├── blog.py
+│   │   └── user.py
+│   ├── routes/           # API route definitions
+│   │   ├── blog.py
+│   │   └── user.py
+│   ├── schema/           # Pydantic schemas
+│   │   ├── blog.py
+│   │   └── user.py
+│   ├── tests/            # Test files
 │   ├── database.py       # Database configuration
 │   ├── main.py           # FastAPI application entry point
-│   ├── model/            # Database models
-│   ├── routes/           # API route definitions
-│   ├── schema/           # Pydantic schemas
 │   ├── requirements.txt  # Python dependencies
 │   └── .env              # Backend environment variables (gitignored)
 └── README.md              # This file

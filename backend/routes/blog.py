@@ -29,7 +29,7 @@ async def add_blog(new_blog:BlogInput,db:AsyncSession=Depends(get_db),current_us
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=400, detail="A blog with this title already exists")
-    await manager.brodcast(f"New blog posted: {blog.title}")
+    await manager.broadcast(f"New blog posted: {blog.title}")
     
     return blog
 
