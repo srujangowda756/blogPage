@@ -29,6 +29,7 @@ export default function BlogList() {
 
     try {
       const data = await fetchBlogs((nextPage - 1) * pageSize, pageSize);
+      console.log(data)
       setBlogs(data);
       setPage(nextPage);
       setHasMore(data.length === pageSize);
